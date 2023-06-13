@@ -77,15 +77,16 @@ def fichier():
             d4[i]   = np.nan
             
     i=i+1
-        
-    
     m_epai = np.nanmean(epai) if len(epai)>0 else np.nan
     m_larg = np.nanmean(larg) if len(larg)>0 else np.nan
       
-    print(larg)
-    print(epai)
 
-    print(m_larg,m_epai)
+    
+    # temp_df = pd.DataFrame({'Epaisseur(mm)':epai,'largeur(mm)':larg})
+    # temp_df.dropna(inplace=True)
+    # epai = temp_df['Epaisseur(mm)'].tolist()
+    # larg =  temp_df['Epaisseur(mm)'].tolist()
+    
     df.insert(5, "epaisseur", epai, True)
     df.insert(6, "largeur", larg, True)
     df.insert(7, "Epaisseur moyenne", m_epai, True)
