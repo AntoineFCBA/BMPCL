@@ -44,7 +44,7 @@ def fichier():
     df = pd.read_csv(full_path, delimiter=",", header=None)
     
         
-    #model
+    #Demande à l'utilisateur de rentrer dim etalon
     ep_etalon = TB1.get(1.0, "end-1c") 
     ep_etalon = float(ep_etalon)
     larg_etalon= TB2.get(1.0, "end-1c")  
@@ -56,17 +56,17 @@ def fichier():
     larg_nom = TB4.get(1.0, "end-1c") 
     larg_nom = float(larg_nom)
     
-    #extract every column from dataframe
+    #extraction des donnée brut dans le dataframe
     lt = df[0]
     d1 = df[1]
     d2 = df[2]
     d3 = df[3]
     d4 = df[4]
-    
+    d5 = df[5]
     #thickness
-    epai = ep_etalon + d2 - d4
+    epai = ep_etalon - d1 - d4
     # formule pour calculer largeur
-    larg = larg_etalon + d1 - d3
+    larg = larg_etalon - d2 - d3
     
     fleche = abs(d1)
     tuil = abs(d2)
@@ -158,7 +158,7 @@ def fichier():
     
     
     
-
+    
 
     m_epai = np.nanmean(epai) if len(epai)>0 else np.nan
     m_larg = np.nanmean(larg) if len(larg)>0 else np.nan
@@ -178,12 +178,12 @@ def fichier():
     ddf = df.dropna()
     ddf.reset_index(drop = True)
     
-     
-    # df["Epaisseur moyenne"].loc[1:len(df)] = None
+ 
+    
+    # df["Epaisseur moyenne"].loc[1:len(df)] = Noned
     # df["Largeur moyenne"].loc[1:len(df)] = None
 
-    ddf.columns = ['t(s)', 'CH5(mm)', 'CH6(mm)', 'CH7(mm)', 'CH8(mm)', 'epaisseur(mm)','largeur(mm)','numero Erpouvette',"tuilage (mm)","fleche(mm)","Epaisseur moyenne (mm)","Largeur moyenne (mm)"]
-    
+    ddf.columns = ['t(s)', 'CH5(mm)', 'CH6(mm)', 'CH7(mm)', 'CH8(mm)', 'epaisseur(mm)','largeur(mm)','numero Eprouvette',"tuilage (mm)","fleche(mm)","Epaisseur moyenne (mm)","Largeur moyenne (mm)"]
     ddf.to_csv('num_'+filename, sep=';', decimal=',',header=True, index=False, index_label=None)
     print('Terminé')
     print('')
