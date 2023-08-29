@@ -166,24 +166,23 @@ def fichier():
     # m_epai = sum(epai)/len(epai)
     # m_larg = sum(larg)/len(larg)
 
-    df.insert(5, "epaisseur", epai, True)
-    df.insert(6, "largeur", larg, True)
-    df.insert(7, "verif", Test2, True)
-    df.insert(8,"tuilage",tuil,True)
-    df.insert(9,"fleche",fleche,True)
-    df.insert(10, "Epaisseur moyenne", m_epai, True)
-    df.insert(11, "Largeur moyenne", m_larg, True)
+    df.insert(6, "epaisseur", epai, True)
+    df.insert(7, "largeur", larg, True)
+    df.insert(8, "verif", Test2, True)
+    df.insert(9,"tuilage",tuil,True)
+    df.insert(10,"fleche",fleche,True)
+    df.insert(11,"gauchissement",gauch,True)
+    df.insert(12, "Epaisseur moyenne", m_epai, True)
+    df.insert(13, "Largeur moyenne", m_larg, True)
 
     #df.dropna(thresh=10)
     ddf = df.dropna()
     ddf.reset_index(drop = True)
     
- 
-    
     # df["Epaisseur moyenne"].loc[1:len(df)] = Noned
     # df["Largeur moyenne"].loc[1:len(df)] = None
 
-    ddf.columns = ['t(s)', 'CH5(mm)', 'CH6(mm)', 'CH7(mm)', 'CH8(mm)', 'epaisseur(mm)','largeur(mm)','numero Eprouvette',"tuilage (mm)","fleche(mm)","Epaisseur moyenne (mm)","Largeur moyenne (mm)"]
+    ddf.columns = ['t(s)', 'CH5(mm)', 'CH6(mm)', 'CH7(mm)', 'CH8(mm)','CH9(mm)','epaisseur(mm)','largeur(mm)','numero Eprouvette',"tuilage (mm)","fleche(mm)","gauchissement(mm)","Epaisseur moyenne (mm)","Largeur moyenne (mm)"]
     ddf.to_csv('num_'+filename, sep=';', decimal=',',header=True, index=False, index_label=None)
     print('Terminé')
     print('')
