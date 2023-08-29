@@ -70,7 +70,7 @@ def fichier():
     
     fleche = abs(d1)
     tuil = abs(d2)
-    
+    gauch = abs(d5)
     new_column = []
 
     #verification
