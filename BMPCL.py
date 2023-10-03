@@ -1,24 +1,22 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Jun 13 15:56:11 2023
 
-@author: haratono
-"""
-
+import customtkinter
 import tkinter as tk
 from tkinter import *
 from tkinter import filedialog
 import os
 import pandas as pd
 import numpy as np
+
     
 ############################## WINDOW ##############################
-root = tk.Tk()
+root = customtkinter.CTk()
 root.title('BMPCL')
 root.geometry('800x350+20+20')
 root.resizable(0, 0)
 
-   
+customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"<
+customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"   
 ############################## FUNCTION ##############################
 
 #================================== directory ==================================
@@ -63,20 +61,23 @@ def fichier():
     d3 = df[3]
     d4 = df[4]
     d5 = df[5]
+
     #thickness
-    epai = ep_etalon - d1 - d4
+    epai = ep_etalon - d1 - d3
+    epai = [round(val, 2) for val in epai]
     # formule pour calculer largeur
-    larg = larg_etalon - d2 - d3
+    larg = larg_etalon - d2 - d5
+    larg = [round(val, 2) for val in larg]
     
     fleche = abs(d1)
-    tuil = abs(d2)
-    gauch = abs(d5)
+    tuil = abs(d3)
+    gauch = abs(d4)
     new_column = []
 
     #verification
     i=0
     for n in epai:
-        if ((ep_nom-5) < epai[i] < (ep_nom + 5)) and ((larg_nom-5) < larg[i] < (larg_nom + 5)):
+        if ((ep_nom-15) < epai[i] < (ep_nom + 15)) and ((larg_nom-15) < larg[i] < (larg_nom + 15)):
                 new_column.insert(i,100)
                 epai[i] = epai[i]
                 larg[i] = larg[i]
@@ -157,9 +158,6 @@ def fichier():
         i = i+1 
     
     
-    
-    
-
     m_epai = np.nanmean(epai) if len(epai)>0 else np.nan
     m_larg = np.nanmean(larg) if len(larg)>0 else np.nan
             
@@ -186,42 +184,105 @@ def fichier():
     ddf.to_csv('num_'+filename, sep=';', decimal=',',header=True, index=False, index_label=None)
     print('Terminé')
     print('')
-   
+    
+def open_last_file():
+    original_filename = TB0.get("1.0", "end-1c")
+    if original_filename:
+        filename, extension = os.path.splitext(os.path.basename(original_filename))
+        processed_filename = f'num_{filename}{extension}'
+        os.startfile(processed_filename)
+        
+def fusionner_fichiers_selectionnes(fichiers, fichier_sortie):
+    # Créer un DataFrame vide pour stocker les données fusionnées
+    fusion_df = pd.DataFrame()
+
+    # Compteur pour le numéro de fichier
+    num_fichier = 1
+
+    # En-têtes (initialisés à None)
+    en_tetes = []
+
+    # Parcourir chaque fichier sélectionné
+    for fichier in fichiers:
+        # Lire uniquement la dernière ligne du fichier
+        with open(fichier, "r") as file:
+            last_line = file.readlines()[-1].strip().split(";")
+
+        # Créer un DataFrame à partir de la dernière ligne du fichier
+        df = pd.DataFrame([last_line])
+
+        # Ajouter une colonne "Id" avec le numéro de fichier
+        df.insert(0, "Id", num_fichier)
+
+        # Arrondir les valeurs à deux décimales
+        df = df.round(2)
+
+        # Ajouter les données du fichier à fusion_df
+        fusion_df = pd.concat([fusion_df, df], axis=0, ignore_index=True)
+
+        # Incrémenter le compteur de fichier
+        num_fichier += 1
+
+        # Lire les en-têtes du fichier une seule fois (lors du premier fichier)
+        if not en_tetes:
+            with open(fichier, "r") as file:
+                en_tetes = file.readline().strip().split(";")
+
+    # Renommer la colonne "temps" en "Id"
+    fusion_df = fusion_df.rename(columns={"temps": "Id"})
+
+    # Ajouter les en-têtes d'origine au début du DataFrame fusionné
+    fusion_df = pd.concat([pd.DataFrame([en_tetes]), fusion_df], ignore_index=True)
+
+    # Écrire le DataFrame fusionné dans un fichier de sortie
+    fusion_df.to_csv(fichier_sortie, sep=';', decimal=',', header=False, index=False)
+
+
+
+
+def selectionner_et_fusionner():
+    fichiers = filedialog.askopenfilenames(filetypes=[("CSV Files", "*.csv")])
+    if fichiers:
+        fichier_sortie = "fusion.csv"
+        fusionner_fichiers_selectionnes(fichiers, fichier_sortie)
+          
 ############################## LABEL ##############################
-L0 = tk.Label(root, text="Chemin du fichier : ").place(x=20, y=20)
-L1 = tk.Label(root, text="Epaisseur de l'étalon (mm) : ").place(x=20, y=60)
-L2 = tk.Label(root, text="Largeur de l'étalon (mm) : ").place(x=20, y=100)
-L3 = tk.Label(root, text="Epaisseur nominale (mm) : ").place(x=20, y=140)
-L4 = tk.Label(root, text="Largeur nominale (mm) : ").place(x=20, y=180)
+L0 =customtkinter.CTkLabel(root, text="Chemin du fichier : ").place(x=20, y=20)
+L1 = customtkinter.CTkLabel(root, text="Epaisseur de l'étalon (mm) : ").place(x=20, y=60)
+L2 = customtkinter.CTkLabel(root, text="Largeur de l'étalon (mm) : ").place(x=20, y=100)
+L3 = customtkinter.CTkLabel(root, text="Epaisseur nominale (mm) : ").place(x=20, y=140)
+L4 = customtkinter.CTkLabel(root, text="Largeur nominale (mm) : ").place(x=20, y=180)
 
 # ================================== choisir ==================================
-file_button = tk.Button(root, text='Fichier',
-                    bg='red', fg='white', command=fichier)
-file_button.place(x=380, y=260)
+file_button = customtkinter.CTkButton(root, text='Fichier', command=fichier)
+file_button.place(x=260, y=240)
 # ================================== repertoire ==================================
-file_button = tk.Button(root, text='Répertoire',
-                    bg='green', fg='white', command=rep)
-file_button.place(x=180, y=260)
-
+file_button =  customtkinter.CTkButton(root, text='Répertoire',command=rep)
+file_button.place(x=60, y=240)
+# ================================== full screen ==================================
+fullscreen_button = customtkinter.CTkButton(root, text='Ouvrir', command=open_last_file,bg_color='red',fg_color='red')
+fullscreen_button.place(x=260, y=280)
+# ================================== full screen ==================================
+fusion_button = customtkinter.CTkButton(root, text='Sélectionner et Fusionner', command=selectionner_et_fusionner)
+fusion_button.place(x=460, y=240)
 ############################## TEXT BOX ##############################
-TB0 = tk.Text(root, height=1, width=60)
+TB0 = customtkinter.CTkTextbox(root, height=1, width=600)
 TB0.place(x=190, y=20)
-TB1 = tk.Text(root, height=1, width=30)
+TB1 = customtkinter.CTkTextbox(root, height=1, width=300)
 TB1.place(x=190, y=60)
-TB2= tk.Text(root, height=1, width=30)
+TB2= customtkinter.CTkTextbox(root, height=1, width=300)
 TB2.place(x=190, y=100)
-TB3 = tk.Text(root, height=1, width=30)
+TB3 = customtkinter.CTkTextbox(root, height=1, width=300)
 TB3.place(x=190, y=140)
-TB4 = tk.Text(root, height=1, width=30)
+TB4 = customtkinter.CTkTextbox(root, height=1, width=300)
 TB4.place(x=190, y=180)
 
 #insert
-TB1.insert('end', 78.25)
-TB2.insert('end', 110.49) 
-TB3.insert('end', 41)
-TB4.insert('end', 107)
-
-    
+TB1.insert('end', 49.65)
+TB2.insert('end', 150) 
+TB3.insert('end', 53)
+TB4.insert('end', 153)
 
 
 root.mainloop()
+
