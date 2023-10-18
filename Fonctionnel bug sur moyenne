@@ -8,17 +8,13 @@ import os
 import pandas as pd
 import numpy as np
 
-    
 ############################## WINDOW ##############################
 root = customtkinter.CTk()
 root.title('BMPCL')
 root.geometry('800x350+20+20')
 root.resizable(0, 0)
-
 customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"<
 customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"   
-############################## FUNCTION ##############################
-
 #================================== directory ==================================
 def rep():
     print('----------------')
@@ -34,27 +30,27 @@ def fichier():
     full_path = filedialog.askopenfilename()
     print("Chemin : " + full_path)
     #extract directory of the raw file and insert in the first text box
+    
     filename = os.path.basename(full_path)
     TB0.delete("1.0","end")
     TB0.insert('end', full_path)
-
     #read raw csv file
-    df = pd.read_csv(full_path, delimiter=",", header=None)
     
-        
+    df = pd.read_csv(full_path, delimiter=",", header=None)
     #Demande à l'utilisateur de rentrer dim etalon
+    
     ep_etalon = TB1.get(1.0, "end-1c") 
     ep_etalon = float(ep_etalon)
     larg_etalon= TB2.get(1.0, "end-1c")  
     larg_etalon = float(larg_etalon)
-
     #nominal
+    
     ep_nom = TB3.get(1.0, "end-1c")  
     ep_nom = float(ep_nom)
     larg_nom = TB4.get(1.0, "end-1c") 
     larg_nom = float(larg_nom)
-    
     #extraction des donnée brut dans le dataframe
+    
     lt = df[0]
     d1 = df[1]
     d2 = df[2]
@@ -63,7 +59,6 @@ def fichier():
     d5 = df[5]
     d6 = df[6]
     d6_pos = abs(d6)
-    print(d6_pos)
     #thickness
     epai = ep_etalon - d1 - d3
     epai = [round(val, 2) for val in epai]
@@ -81,7 +76,6 @@ def fichier():
         if elem > 30:
             elem = int(elem)
             nouvelle_liste.append(elem)
-    print(nouvelle_liste)
     
     Liste_Max = max(nouvelle_liste)
     Liste_Min = min(nouvelle_liste)
@@ -89,7 +83,6 @@ def fichier():
     print(f_arrow)
     new_column = []
     
-
     #verification
     i=0
     for n in epai:
@@ -111,7 +104,6 @@ def fichier():
                 tuil[i] = d4[i]
         i=i+1
         
-    #read plank file
     df2 = pd.read_csv("planche.csv", delimiter=";", header=None, skiprows=1)
     planche = df2[0]
     
@@ -124,14 +116,12 @@ def fichier():
     Number=1
     Test2=[]
 
-
     if new_column[0] == 0 :
         Test2.insert(cc, 0)
     else:
         Test2.insert(cc, planche[Number-1])
         
     cc=cc+1
-
 
     for n in range(len(new_column)-2):
         if new_column[i1] == 0 and new_column[i2] == 0 and new_column[i3] == 0:
@@ -173,10 +163,6 @@ def fichier():
             
             
         i = i+1 
-    
-    
-    m_epai = np.nanmean(epai) if len(epai)>0 else np.nan
-    m_larg = np.nanmean(larg) if len(larg)>0 else np.nan
             
     # m_epai = sum(epai)/len(epai)
     # m_larg = sum(larg)/len(larg)
@@ -188,30 +174,15 @@ def fichier():
     df.insert(11,"fleche",fleche,True)
     df.insert(12,"gauchissement",gauch,True)
     df.insert(13, "Fleche de face",f_arrow,True)
-    df.insert(14, "Epaisseur moyenne", m_epai, True)
-    df.insert(15, "Largeur moyenne", m_larg, True)
-
-    
-    
+  
     ddf = df.dropna()
     ddf.reset_index(drop = True)
-    
-    moyennes_df = df.groupby('verif').mean()
-    nouveaux_entetes = [
-        "ch5", "ch7", "ch8", "ch9", "ch10","ch11",
-        "Epaisseur", "Largeur", "Tuilage", "Fleche", "Gauchissement",
-        "Epaisseur moyenne", "Largeur moyenne","flèche de face","test"
-    ]
-    moyennes_df.columns = nouveaux_entetes
-    moyennes_df = moyennes_df.iloc[:, :-2]
-
-    # Écrire le DataFrame fusionné dans un fichier de sortie
-    moyennes_df.to_csv('moyennes_'+filename, sep=';', decimal=',', header=True, index=True)
-    # df["Epaisseur moyenne"].loc[1:len(df)] = Noned
-    # df["Largeur moyenne"].loc[1:len(df)] = None
-
-    ddf.columns = ['t(s)', 'CH5(mm)', 'CH7(mm)', 'CH8(mm)', 'CH9(mm)','CH10(mm)','CH11(mm)','epaisseur(mm)','largeur(mm)','numero Eprouvette',"tuilage (mm)","fleche(mm)","gauchissement(mm)","Epaisseur moyenne (mm)","Largeur moyenne (mm)","fleche de face"]
+#     moyennes_df = moyennes_df.iloc[:, :-2]
+    ddf.columns = ['t(s)', 'CH5(mm)', 'CH7(mm)', 'CH8(mm)', 'CH9(mm)','CH10(mm)','CH11(mm)','epaisseur(mm)','largeur(mm)','numero Eprouvette',"tuilage (mm)","fleche(mm)","gauchissement(mm)","fleche de face"]
     ddf.to_csv('num_'+filename, sep=';', decimal=',',header=True, index=False, index_label=None)
+    moyennes_df = df.groupby('verif').mean()
+    moyennes_df.columns = ['t(s)', 'CH5(mm)', 'CH7(mm)', 'CH8(mm)', 'CH9(mm)','CH10(mm)','CH11(mm)','epaisseur(mm)','largeur(mm)',"tuilage (mm)","fleche(mm)","gauchissement(mm)","fleche de face (mm)"]
+    moyennes_df.to_csv('moyennes_'+filename, sep=';', decimal=',', header=True, index=True)
     print('Terminé')
     print('')
     
@@ -267,9 +238,6 @@ def fusionner_fichiers_selectionnes(fichiers, fichier_sortie):
     # Écrire le DataFrame fusionné dans un fichier de sortie
     fusion_df.to_csv(fichier_sortie, sep=';', decimal=',', header=False, index=False)
 
-
-
-
 def selectionner_et_fusionner():
     fichiers = filedialog.askopenfilenames(filetypes=[("CSV Files", "*.csv")])
     if fichiers:
@@ -313,6 +281,6 @@ TB2.insert('end', 150)
 TB3.insert('end', 53)
 TB4.insert('end', 153)
 
-
 root.mainloop()
+
 
