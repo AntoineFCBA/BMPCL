@@ -57,8 +57,17 @@ def fichier():
     d3 = df[3]
     d4 = df[4]
     d5 = df[5]
+    # Supprimer les valeurs inférieures à 25 dans la série d6
     d6 = df[6]
+    
+    # Écrire toutes les valeurs de d6 dans un fichier texte
+    with open('valeurs_d6.txt', 'w') as file:                     
+        for value in d6:
+            file.write(str(value) + '\n')
+
     d6_pos = abs(d6)
+    d6_fin = d6_pos[d6_pos >= 25]
+    print(d6_fin)
     #thickness
     epai = ep_etalon - d1 - d3
     epai = [round(val, 2) for val in epai]
@@ -66,23 +75,24 @@ def fichier():
     larg = larg_etalon - d2 - d5
     larg = [round(val, 2) for val in larg]
     
-    fleche = abs(d1)
+    fleche = abs(d2)
     tuil = abs(d3)
     gauch = abs(d4)
-    flc = [abs(element) for element in d6]
-    nouvelle_liste = []
+    fl_face = d6_fin
+   #flc = [abs(element) for element in d6]
+    #nouvelle_liste = []
     
-    for elem in d6_pos :
-        if elem > 30:
-            elem = int(elem)
-            nouvelle_liste.append(elem)
+    #for elem in d6_pos :
+      # if elem > 30:
+        #   elem = int(elem)
+        #  nouvelle_liste.append(elem)
     
-    Liste_Max = max(nouvelle_liste)
-    Liste_Min = min(nouvelle_liste)
-    f_arrow = Liste_Max - Liste_Min
+  #  Liste_Max = max(nouvelle_liste)
+    #Liste_Min = min(nouvelle_liste)
+    f_arrow = abs(d6)
     print(f_arrow)
     new_column = []
-    
+
     #verification
     i=0
     for n in epai:
@@ -99,6 +109,8 @@ def fichier():
                 d2[i]   = np.nan
                 d3[i]   = np.nan
                 d4[i]   = np.nan
+                d5[i]   = np.nan
+                d6[i]   = np.nan
                 lt[i]   = np.nan
                 fleche[i] = lt[i]
                 tuil[i] = d4[i]
@@ -160,28 +172,26 @@ def fichier():
     for n in Test2 : 
         if n == 0 :
             Test2[i] = np.nan
-            
-            
-        i = i+1 
-            
-    # m_epai = sum(epai)/len(epai)
-    # m_larg = sum(larg)/len(larg)
-
+    
+        i = i+1
+        
     df.insert(7, "epaisseur", epai, True)
     df.insert(8, "largeur", larg, True)
     df.insert(9, "verif", Test2, True)
     df.insert(10,"tuilage",tuil,True)
     df.insert(11,"fleche",fleche,True)
     df.insert(12,"gauchissement",gauch,True)
-    df.insert(13, "Fleche de face",f_arrow,True)
+    df.insert(13, "Fleche de face",fl_face,True)
+    df["Fleche de face"] = df.groupby('verif')["Fleche de face"].transform(lambda x: x.max() - x.min())
+    print(df.columns)
   
     ddf = df.dropna()
     ddf.reset_index(drop = True)
 #     moyennes_df = moyennes_df.iloc[:, :-2]
-    ddf.columns = ['t(s)', 'CH5(mm)', 'CH7(mm)', 'CH8(mm)', 'CH9(mm)','CH10(mm)','CH11(mm)','epaisseur(mm)','largeur(mm)','numero Eprouvette',"tuilage (mm)","fleche(mm)","gauchissement(mm)","fleche de face"]
     ddf.to_csv('num_'+filename, sep=';', decimal=',',header=True, index=False, index_label=None)
     moyennes_df = df.groupby('verif').mean()
-    moyennes_df.columns = ['t(s)', 'CH5(mm)', 'CH7(mm)', 'CH8(mm)', 'CH9(mm)','CH10(mm)','CH11(mm)','epaisseur(mm)','largeur(mm)',"tuilage (mm)","fleche(mm)","gauchissement(mm)","fleche de face (mm)"]
+    moyennes_df.columns = ['t(s)', 'CH5(mm)', 'CH7(mm)', 'CH8(mm)', 'CH9(mm)','CH10(mm)','CH11(mm)','epaisseur(mm)','largeur(mm)',"tuilage (mm)","fleche(mm)","gauchissement(mm)","Fleche de face"]
+    print(df.columns)
     moyennes_df.to_csv('moyennes_'+filename, sep=';', decimal=',', header=True, index=True)
     print('Terminé')
     print('')
@@ -196,15 +206,16 @@ def open_last_file():
 def fusionner_fichiers_selectionnes(fichiers, fichier_sortie):
     # Créer un DataFrame vide pour stocker les données fusionnées
     fusion_df = pd.DataFrame()
-
+    
     # Compteur pour le numéro de fichier
     num_fichier = 1
-
+    
     # En-têtes (initialisés à None)
     en_tetes = []
-
+    
     # Parcourir chaque fichier sélectionné
     for fichier in fichiers:
+        
         # Lire uniquement la dernière ligne du fichier
         with open(fichier, "r") as file:
             last_line = file.readlines()[-1].strip().split(";")
