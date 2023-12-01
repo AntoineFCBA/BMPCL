@@ -1,0 +1,34 @@
+
+
+import pandas as pd
+from tkinter import filedialog
+import os
+
+def fusionner_fichiers_selectionnes(fichiers, fichier_sortie):
+    # Créer un DataFrame vide pour stocker les données fusionnées
+    fusion_df = pd.DataFrame()
+
+    # Parcourir chaque fichier sélectionné
+    for fichier in fichiers:
+        # Vérifier si le fichier n'est pas vide
+        if os.path.getsize(fichier) > 0:
+            # Lire le fichier CSV
+            df = pd.read_csv(fichier, delimiter=';')
+
+            # Vérifier si le fichier a au moins deux lignes
+            if len(df) > 1:
+                # Ajouter les données du fichier à fusion_df
+                fusion_df = pd.concat([fusion_df, df], ignore_index=True)
+            else:
+                print(f"Attention: Le fichier {fichier} ne contient pas suffisamment de lignes.")
+        else:
+            print(f"Attention: Le fichier {fichier} est vide.")
+
+    # Écrire le DataFrame fusionné dans un fichier de sortie
+    fusion_df.to_csv(fichier_sortie, sep=';', decimal=',', index=False)
+
+def selectionner_et_fusionner():
+    fichiers = filedialog.askopenfilenames(filetypes=[("CSV Files", "*.csv")])
+    if fichiers:
+        fichier_sortie = "fusion.csv"
+        fusionner_fichiers_selectionnes(fichiers, fichier_sortie)
