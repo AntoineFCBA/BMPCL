@@ -23,17 +23,6 @@ def rep():
     os.chdir(full_path)
     print("Répertoire actuel : " + full_path)
     print('')
-    
-def max_except_last(series):
-    # Convertir la série en liste
-    values = series.tolist()
-
-    # Supprimer la dernière valeur si la série a plus d'une valeur
-    if len(values) > 1:
-        values.pop()
-
-    # Retourner la valeur maximale après la suppression de la dernière valeur
-    return max(values) if values else 0
 
 def fichier():
     print('----------------')
@@ -69,10 +58,6 @@ def fichier():
     d5 = df[5]
     d6 = df[6]
     
-    for i, value in enumerate(d4):
-        if value >= 25:
-            d4[i] = np.nan
-
     #thickness
     epai = ep_etalon - d1 - d3
     epai = [round(val, 2) for val in epai]
@@ -82,23 +67,20 @@ def fichier():
     
     fleche = abs(d2)
     tuil = abs(d3)
-    gauch = abs(d4)
     fl_face = abs(d6)
-
+    gauch = abs(d4)
     new_column = []
-    
+
     #verification
     i=0
-    gauch_values = []
     for n in epai:
-        if ((ep_nom-15) < epai[i] < (ep_nom + 15)) and ((larg_nom-15) < larg[i] < (larg_nom + 15)):
+        if ((ep_nom-4) < epai[i] < (ep_nom + 4)) and ((larg_nom-4) < larg[i] < (larg_nom + 4)):
                 new_column.insert(i,100)
                 epai[i] = epai[i]
                 larg[i] = larg[i]
                 
         else:
                 new_column.insert(i,0)
-                gauch[i] = np.nan
                 epai[i] = np.nan
                 larg[i] = np.nan
                 d1[i]   = np.nan
@@ -110,13 +92,10 @@ def fichier():
                 lt[i]   = np.nan
                 fleche[i] = lt[i]
                 tuil[i] = d4[i]
-                
-            
         i=i+1
+        
     df2 = pd.read_csv("planche.csv", delimiter=";", header=None, skiprows=1)
     planche = df2[0]
-    gauch[-1] = np.nan
-    
     i1=0
     i2=1
     i3=2
@@ -172,7 +151,7 @@ def fichier():
             Test2[i] = np.nan
     
         i = i+1
-             
+        
     df.insert(7, "epaisseur", epai, True)
     df.insert(8, "largeur", larg, True)
     df.insert(9, "verif", Test2, True)
@@ -180,12 +159,17 @@ def fichier():
     df.insert(11,"fleche",fleche,True)
     df.insert(12,"gauchissement",gauch,True)
     df.insert(13, "Fleche de face",fl_face,True)
- 
+    
+    df['gauchissement'] = np.where(df['gauchissement'] < 25, df['gauchissement'], np.nan)
+    
+    condition = (df['gauchissement'] <= df[['tuilage', 'Fleche de face']].max(axis=1))
+    df.loc[condition, ['tuilage', 'Fleche de face']] = np.nan
+    
     df["Fleche de face"] = df.groupby('verif')["Fleche de face"].transform(lambda x: x.max() - x.min())
     df["tuilage"] = df.groupby('verif')['tuilage'].transform('max')
     df["fleche"] = df.groupby('verif')['fleche'].transform('max')
     df["gauchissement"] = df.groupby('verif')['gauchissement'].transform('max')
-      
+
     ddf = df.dropna()
     ddf.reset_index(drop = True)
 #     moyennes_df = moyennes_df.iloc[:, :-2]
@@ -203,51 +187,27 @@ def open_last_file():
         processed_filename = f'num_{filename}{extension}'
         os.startfile(processed_filename)
         
-def fusionner_fichiers_selectionnes(fichiers, fichier_sortie):
-    # Créer un DataFrame vide pour stocker les données fusionnées
-    fusion_df = pd.DataFrame()
-    
-    # Compteur pour le numéro de fichier
-    num_fichier = 1
-    
-    # En-têtes (initialisés à None)
-    en_tetes = []
-    
-    # Parcourir chaque fichier sélectionné
-    for fichier in fichiers:
         
-        # Lire uniquement la dernière ligne du fichier
-        with open(fichier, "r") as file:
-            last_line = file.readlines()[-1].strip().split(";")
+def fusionner_fichiers_selectionnes(fichiers, fichier_sortie):
+    # Ouvrir le fichier de sortie en mode écriture
+    with open(fichier_sortie, 'w') as fusion_file:
+        # Écrire l'en-tête dans le fichier de sortie
+        header = "verif\tt(s)\tCH5(mm)\tCH7(mm)\tCH8(mm)\tCH9(mm)\tCH10(mm)\tCH11(mm)\tepaisseur(mm)\tlargeur(mm)\ttuilage (mm)\tfleche(mm)\tgauchissement(mm)\tFleche de face\n"
+        fusion_file.write(header)
 
-        # Créer un DataFrame à partir de la dernière ligne du fichier
-        df = pd.DataFrame([last_line])
+        # Parcourir chaque fichier sélectionné
+        for fichier in fichiers:
+            # Vérifier si le fichier n'est pas vide
+            if os.path.getsize(fichier) > 0:
+                # Lire la deuxième ligne du fichier
+                deuxieme_ligne = open(fichier, 'r').readlines()[1].strip()
 
-        # Ajouter une colonne "Id" avec le numéro de fichier
-        df.insert(0, "Id", num_fichier)
+                # Écrire la deuxième ligne dans le fichier de sortie
+                fusion_file.write(deuxieme_ligne + '\n')
+            else:
+                print(f"Attention: Le fichier {fichier} est vide.")
 
-        # Arrondir les valeurs à deux décimales
-        df = df.round(2)
-
-        # Ajouter les données du fichier à fusion_df
-        fusion_df = pd.concat([fusion_df, df], axis=0, ignore_index=True)
-
-        # Incrémenter le compteur de fichier
-        num_fichier += 1
-
-        # Lire les en-têtes du fichier une seule fois (lors du premier fichier)
-        if not en_tetes:
-            with open(fichier, "r") as file:
-                en_tetes = file.readline().strip().split(";")
-
-    # Renommer la colonne "temps" en "Id"
-    fusion_df = fusion_df.rename(columns={"temps": "Id"})
-
-    # Ajouter les en-têtes d'origine au début du DataFrame fusionné
-    fusion_df = pd.concat([pd.DataFrame([en_tetes]), fusion_df], ignore_index=True)
-
-    # Écrire le DataFrame fusionné dans un fichier de sortie
-    fusion_df.to_csv(fichier_sortie, sep=';', decimal=',', header=False, index=False)
+    print(f"Fusion terminée. Les lignes deux de chaque fichier ont été ajoutées à {fichier_sortie}")
 
 def selectionner_et_fusionner():
     fichiers = filedialog.askopenfilenames(filetypes=[("CSV Files", "*.csv")])
@@ -293,5 +253,3 @@ TB3.insert('end', 53)
 TB4.insert('end', 153)
 
 root.mainloop()
-
-
