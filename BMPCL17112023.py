@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import customtkinter
 import tkinter as tk
 from tkinter import *
@@ -12,7 +11,6 @@ import numpy as np
 root = customtkinter.CTk()
 root.title('BMPCL')
 root.geometry('800x350+20+20')
-root.resizable(0, 0)
 customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"<
 customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"   
 #================================== directory ==================================
@@ -75,7 +73,7 @@ def fichier():
     #verification
     i=0
     for n in epai:
-        if ((ep_nom-4) < epai[i] < (ep_nom + 4)) and ((larg_nom-4) < larg[i] < (larg_nom + 4)):
+        if ((ep_nom-6) < epai[i] < (ep_nom + 6)) and ((larg_nom-6) < larg[i] < (larg_nom + 6)):
                 new_column.insert(i,100)
                 epai[i] = epai[i]
                 larg[i] = larg[i]
@@ -187,6 +185,28 @@ def open_last_file():
         filename, extension = os.path.splitext(os.path.basename(original_filename))
         processed_filename = f'num_{filename}{extension}'
         os.startfile(processed_filename)
+        
+        
+def fusionner_fichiers_selectionnes(fichiers, fichier_sortie):
+    # Ouvrir le fichier de sortie en mode écriture
+    with open(fichier_sortie, 'w') as fusion_file:
+        # Écrire l'en-tête dans le fichier de sortie
+        header = "verif\tt(s)\tCH5(mm)\tCH7(mm)\tCH8(mm)\tCH9(mm)\tCH10(mm)\tCH11(mm)\tepaisseur(mm)\tlargeur(mm)\ttuilage (mm)\tfleche(mm)\tgauchissement(mm)\tFleche de face\n"
+        fusion_file.write(header)
+
+        # Parcourir chaque fichier sélectionné
+        for fichier in fichiers:
+            # Vérifier si le fichier n'est pas vide
+            if os.path.getsize(fichier) > 0:
+                # Lire la deuxième ligne du fichier
+                deuxieme_ligne = open(fichier, 'r').readlines()[1].strip()
+
+                # Écrire la deuxième ligne dans le fichier de sortie
+                fusion_file.write(deuxieme_ligne + '\n')
+            else:
+                print(f"Attention: Le fichier {fichier} est vide.")
+
+    print(f"Fusion terminée. Les lignes deux de chaque fichier ont été ajoutées à {fichier_sortie}")
 
 def selectionner_et_fusionner():
     fichiers = filedialog.askopenfilenames(filetypes=[("CSV Files", "*.csv")])
