@@ -6,12 +6,10 @@ from tkinter import filedialog
 import os
 import pandas as pd
 import numpy as np
-
 ############################## WINDOW ##############################
 root = customtkinter.CTk()
 root.title('BMPCL')
 root.geometry('800x350+20+20')
-root.resizable(0, 0)
 customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"<
 customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"   
 #================================== directory ==================================
@@ -74,7 +72,7 @@ def fichier():
     #verification
     i=0
     for n in epai:
-        if ((ep_nom-4) < epai[i] < (ep_nom + 4)) and ((larg_nom-4) < larg[i] < (larg_nom + 4)):
+        if ((ep_nom-5) < epai[i] < (ep_nom + 5)) and ((larg_nom-5) < larg[i] < (larg_nom + 5)):
                 new_column.insert(i,100)
                 epai[i] = epai[i]
                 larg[i] = larg[i]
@@ -161,9 +159,8 @@ def fichier():
     df.insert(13, "Fleche de face",fl_face,True)
     
     df['gauchissement'] = np.where(df['gauchissement'] < 25, df['gauchissement'], np.nan)
-    
-    condition = (df['gauchissement'] <= df[['tuilage', 'Fleche de face']].max(axis=1))
-    df.loc[condition, ['tuilage', 'Fleche de face']] = np.nan
+    #condition = (df['gauchissement'] <= df[['tuilage', 'Fleche de face']].max(axis=1))
+   # df.loc[condition, ['tuilage', 'Fleche de face']] = np.nan
     
     df["Fleche de face"] = df.groupby('verif')["Fleche de face"].transform(lambda x: x.max() - x.min())
     df["tuilage"] = df.groupby('verif')['tuilage'].transform('max')
