@@ -10,9 +10,9 @@ import numpy as np
 root = customtkinter.CTk()
 root.title('BMPCL')
 root.geometry('800x350+20+20')
-customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"<
-customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"   
-#================================== directory ==================================
+customtkinter.set_appearance_mode("Dark")  
+customtkinter.set_default_color_theme("dark-blue")     
+#================================== directory =============================
 def rep():
     print('----------------')
     full_path = filedialog.askdirectory()
@@ -54,18 +54,19 @@ def fichier():
     d3 = df[3]
     d4 = df[4]
     d5 = df[5]
-    d6 = df[6]
+    d6 = df[1]
     
     #thickness
     epai = ep_etalon - d1 - d3
     epai = [round(val, 2) for val in epai]
+    
     # formule pour calculer largeur
     larg = larg_etalon - d2 - d5
     larg = [round(val, 2) for val in larg]
     
     fleche = abs(d2)
     tuil = abs(d3)
-    fl_face = abs(d6)
+    fl_face = abs(d1)
     gauch = abs(d4)
     new_column = []
 
@@ -218,7 +219,6 @@ L1 = customtkinter.CTkLabel(root, text="Epaisseur de l'étalon (mm) : ").place(x
 L2 = customtkinter.CTkLabel(root, text="Largeur de l'étalon (mm) : ").place(x=20, y=100)
 L3 = customtkinter.CTkLabel(root, text="Epaisseur nominale (mm) : ").place(x=20, y=140)
 L4 = customtkinter.CTkLabel(root, text="Largeur nominale (mm) : ").place(x=20, y=180)
-
 # ================================== choisir ==================================
 file_button = customtkinter.CTkButton(root, text='Fichier', command=fichier)
 file_button.place(x=260, y=240)
@@ -242,7 +242,6 @@ TB3 = customtkinter.CTkTextbox(root, height=1, width=300)
 TB3.place(x=190, y=140)
 TB4 = customtkinter.CTkTextbox(root, height=1, width=300)
 TB4.place(x=190, y=180)
-
 #insert
 TB1.insert('end', 49.65)
 TB2.insert('end', 150) 
